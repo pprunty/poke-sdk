@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error handling with specific exception classes
 - Caching and request de-duplication for async clients
 - Full test coverage with pytest and type checking with mypy
+- Automated PyPI publishing with semantic versioning

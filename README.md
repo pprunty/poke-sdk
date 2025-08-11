@@ -180,6 +180,9 @@ poetry run pytest -v
 - **Unit tests** (`tests/test_*_unit.py`): Mock HTTP calls to test retry logic, error handling, and client behavior
 - **Integration tests** (`tests/test_integration.py`): Hit the real PokeAPI to verify end-to-end functionality
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines. This project uses conventional commits for automated versioning and PyPI publishing.
 
 ## License
 

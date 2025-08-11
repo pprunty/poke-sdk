@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "poke-api-sdk"
+name = "poke-sdk"
 version = "0.1.0"
 description = "A modern, async-first Python SDK for the PokeAPI with caching, de-duplication, and comprehensive error handling"
 authors = ["pprunty <patrickprunty.business@gmail.com>"]
