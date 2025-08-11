@@ -16,15 +16,15 @@ help:  ## Show this help message
 
 install:  ## Install dependencies
 	@echo "$(BLUE)Installing dependencies...$(RESET)"
-	poetry install -E test -E dev
+	poetry install
 	@echo "$(GREEN)✓ Dependencies installed$(RESET)"
 
-format:  ## Format code and fix linting issues with black/flake8
-	@echo "$(BLUE)Formatting code with black...$(RESET)"
-	poetry run black src tests
+format:  ## Format code and run linting checks with ruff
+	@echo "$(BLUE)Formatting code with ruff...$(RESET)"
+	poetry run ruff format .
 	@echo "$(GREEN)✓ Code formatted$(RESET)"
-	@echo "$(BLUE)Running flake8 linting checks...$(RESET)"
-	poetry run flake8 src tests
+	@echo "$(BLUE)Running ruff linting checks with auto-fix...$(RESET)"
+	poetry run ruff check . --fix
 	@echo "$(GREEN)✓ Linting passed$(RESET)"
 
 test:  ## Run all tests (unit + integration)

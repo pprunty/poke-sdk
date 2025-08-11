@@ -1,9 +1,14 @@
 from __future__ import annotations
+
 import asyncio
 import time
+
 import httpx
 
-from ._exceptions import APIConnectionError, APIStatusError, NotFoundError, map_http_error
+from ._exceptions import (
+    APIConnectionError,
+    map_http_error,
+)
 
 DEFAULT_BASE_URL = "https://pokeapi.co/api/v2"
 DEFAULT_TIMEOUT = 10.0
@@ -62,13 +67,19 @@ class Poke(BaseClient):
     ):
         super().__init__(base_url=base_url, timeout=timeout)
         # attach resource namespaces
-        from .resources.pokemon import PokemonResource
         from .resources.generation import GenerationResource
+        from .resources.pokemon import PokemonResource
         from .resources.search import SearchResource
 
         self.pokemon = PokemonResource(self)
         self.generation = GenerationResource(self)
         self.search = SearchResource(self)
+
+        # Endpoint to resource mapping for pagination
+        self._resources = {
+            "pokemon": self.pokemon,
+            "generation": self.generation,
+        }
 
     def _request(self, method: str, path: str, **kw) -> httpx.Response:
         url = self._join(path)
@@ -81,12 +92,17 @@ class Poke(BaseClient):
                 r = httpx.request(method, url, timeout=timeout, **kw)
                 if r.status_code >= 500 and attempt < retries:
                     # transient server errors -> retry
-                    time.sleep(backoff * (2 ** attempt))
+                    time.sleep(backoff * (2**attempt))
                     continue
                 break
-            except (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.NetworkError, httpx.HTTPError) as e:
+            except (
+                httpx.ConnectTimeout,
+                httpx.ReadTimeout,
+                httpx.NetworkError,
+                httpx.HTTPError,
+            ) as e:
                 if attempt < retries:
-                    time.sleep(backoff * (2 ** attempt))
+                    time.sleep(backoff * (2**attempt))
                     continue
                 raise APIConnectionError(str(e)) from e
 
@@ -94,6 +110,12 @@ class Poke(BaseClient):
             body = _safe_get_response_body(r)
             raise map_http_error(r.status_code, body)
         return r
+
+    def _list(self, endpoint: str, **params):
+        """Internal helper method for pagination to delegate list calls to resources."""
+        if endpoint in self._resources:
+            return self._resources[endpoint].list(**params)
+        raise ValueError(f"Unknown endpoint for pagination: {endpoint}")
 
 
 class AsyncPoke(BaseClient):
@@ -106,13 +128,19 @@ class AsyncPoke(BaseClient):
         super().__init__(base_url=base_url, timeout=timeout)
         self._client = httpx.AsyncClient(timeout=self._timeout)
         self._locks: dict[str, asyncio.Lock] = {}
-        from .resources.pokemon import AsyncPokemonResource
         from .resources.generation import AsyncGenerationResource
+        from .resources.pokemon import AsyncPokemonResource
         from .resources.search import AsyncSearchResource
 
         self.pokemon = AsyncPokemonResource(self)
         self.generation = AsyncGenerationResource(self)
         self.search = AsyncSearchResource(self)
+
+        # Endpoint to resource mapping for pagination
+        self._resources = {
+            "pokemon": self.pokemon,
+            "generation": self.generation,
+        }
 
     async def aclose(self) -> None:
         await self._client.aclose()
@@ -132,12 +160,17 @@ class AsyncPoke(BaseClient):
                 r = await self._client.request(method, url, **kw)
                 if r.status_code >= 500 and attempt < retries:
                     # transient server errors -> retry
-                    await asyncio.sleep(backoff * (2 ** attempt))
+                    await asyncio.sleep(backoff * (2**attempt))
                     continue
                 break
-            except (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.NetworkError, httpx.HTTPError) as e:
+            except (
+                httpx.ConnectTimeout,
+                httpx.ReadTimeout,
+                httpx.NetworkError,
+                httpx.HTTPError,
+            ) as e:
                 if attempt < retries:
-                    await asyncio.sleep(backoff * (2 ** attempt))
+                    await asyncio.sleep(backoff * (2**attempt))
                     continue
                 raise APIConnectionError(str(e)) from e
 
@@ -145,3 +178,9 @@ class AsyncPoke(BaseClient):
             body = _safe_get_response_body(r)
             raise map_http_error(r.status_code, body)
         return r
+
+    async def _alist(self, endpoint: str, **params):
+        """Internal async helper method for pagination to delegate list calls to resources."""
+        if endpoint in self._resources:
+            return await self._resources[endpoint].list(**params)
+        raise ValueError(f"Unknown endpoint for pagination: {endpoint}")

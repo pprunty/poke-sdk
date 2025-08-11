@@ -1,8 +1,12 @@
 """Base models for PokeAPI types."""
 
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel as PydanticBaseModel, ConfigDict
+
+from typing import Any
+
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict
+
 
 class BaseModel(PydanticBaseModel):
     """Base model with common configuration and friendly printing."""
@@ -19,20 +23,20 @@ class BaseModel(PydanticBaseModel):
     def __repr__(self) -> str:
         """Friendly representation showing key fields and list counts."""
         return self._friendly_repr()
-    
+
     def __str__(self) -> str:
         """Same as repr for consistent friendly printing."""
         return self._friendly_repr()
-        
+
     def _friendly_repr(self) -> str:
         """Build friendly representation showing all scalar fields and list counts."""
         # Priority fields to show first (in order)
         priority_fields = ("id", "name")
-        
+
         # Collect all scalar fields (non-list, non-complex objects)
         scalar_fields = []
         list_counts = {}
-        
+
         # First add priority fields
         for field_name in priority_fields:
             if hasattr(self, field_name):
@@ -42,12 +46,12 @@ class BaseModel(PydanticBaseModel):
                 else:
                     value = repr(value)
                 scalar_fields.append(f"{field_name}={value}")
-        
+
         # Then add all other fields
         for field_name in self.model_fields:
             if field_name not in priority_fields and hasattr(self, field_name):
                 field_val = getattr(self, field_name)
-                
+
                 if isinstance(field_val, list):
                     # Lists: only show count if non-empty
                     if len(field_val) > 0:
@@ -64,39 +68,41 @@ class BaseModel(PydanticBaseModel):
                     scalar_fields.append(f"{field_name}={value}")
                 elif isinstance(field_val, BaseModel):
                     # Nested BaseModel objects: show just class name, not full repr
-                    scalar_fields.append(f"{field_name}={field_val.__class__.__name__}(...)")
-        
+                    scalar_fields.append(
+                        f"{field_name}={field_val.__class__.__name__}(...)"
+                    )
+
         # Build final representation
         parts = scalar_fields.copy()
         if list_counts:
             list_str = ", ".join(f"{k}: {v}" for k, v in list_counts.items())
             parts.append(f"lists={{{list_str}}}")
-        
+
         return f"{self.__class__.__name__}({', '.join(parts)})"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return self.model_dump()
-    
+
     def to_json(self, **kwargs) -> str:
         """Convert to JSON string representation."""
         return self.model_dump_json(**kwargs)
-    
+
     def summary(self) -> str:
         """Multi-line pretty summary (optional detailed view)."""
         lines = [f"{self.__class__.__name__}:"]
-        
+
         # Show key fields
         for field_name in ("id", "name", "height", "weight", "base_experience"):
             if hasattr(self, field_name):
                 value = getattr(self, field_name)
                 lines.append(f"  {field_name}: {value}")
-        
+
         # Show list counts
         for field_name, field_value in self.__dict__.items():
             if isinstance(field_value, list) and len(field_value) > 0:
                 lines.append(f"  {field_name}: {len(field_value)} items")
-        
+
         return "\n".join(lines)
 
 
@@ -115,9 +121,9 @@ class NamedAPIResourceList(BaseModel):
     """List of named API resources with pagination info."""
 
     count: int
-    next: Optional[str] = None
-    previous: Optional[str] = None
-    results: List[NamedAPIResource]
+    next: str | None = None
+    previous: str | None = None
+    results: list[NamedAPIResource]
 
 
 class Name(BaseModel):

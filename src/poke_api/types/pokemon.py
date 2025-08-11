@@ -1,7 +1,9 @@
 """Pokemon-related Pydantic models."""
 
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
+
+from typing import Any, Optional
+
 from pydantic import Field
 
 from .._types import BaseModel, NamedResource
@@ -33,7 +35,7 @@ class HeldItem(BaseModel):
     """Pokemon held item information."""
 
     item: NamedResource
-    version_details: List[VersionDetail]
+    version_details: list[VersionDetail]
 
 
 class VersionDetail(BaseModel):
@@ -70,13 +72,13 @@ class Move(BaseModel):
     """Pokemon move information."""
 
     move: NamedResource
-    version_group_details: List[VersionGroupDetail]
+    version_group_details: list[VersionGroupDetail]
 
 
 class PastAbility(BaseModel):
     """Past generation ability information."""
 
-    abilities: List[Ability]
+    abilities: list[Ability]
     generation: NamedResource
 
 
@@ -91,7 +93,7 @@ class PastType(BaseModel):
     """Past generation type information."""
 
     generation: NamedResource
-    types: List[PokemonType]
+    types: list[PokemonType]
 
 
 class Sprites(BaseModel):
@@ -105,8 +107,8 @@ class Sprites(BaseModel):
     front_female: Optional[str] = None
     front_shiny: Optional[str] = None
     front_shiny_female: Optional[str] = None
-    other: Optional[Dict[str, Any]] = None
-    versions: Optional[Dict[str, Any]] = None
+    other: Optional[dict[str, Any]] = None
+    versions: Optional[dict[str, Any]] = None
 
 
 class Stat(BaseModel):
@@ -129,18 +131,18 @@ class Pokemon(BaseModel):
     order: int
     location_area_encounters: str
 
-    abilities: List[Ability] = Field(default_factory=list)
+    abilities: list[Ability] = Field(default_factory=list)
     cries: Optional[Cries] = None
-    forms: List[NamedResource] = Field(default_factory=list)
-    game_indices: List[GameIndex] = Field(default_factory=list)
-    held_items: List[HeldItem] = Field(default_factory=list)
-    moves: List[Move] = Field(default_factory=list)
-    past_abilities: List[PastAbility] = Field(default_factory=list)
-    past_types: List[PastType] = Field(default_factory=list)
+    forms: list[NamedResource] = Field(default_factory=list)
+    game_indices: list[GameIndex] = Field(default_factory=list)
+    held_items: list[HeldItem] = Field(default_factory=list)
+    moves: list[Move] = Field(default_factory=list)
+    past_abilities: list[PastAbility] = Field(default_factory=list)
+    past_types: list[PastType] = Field(default_factory=list)
     species: NamedResource
     sprites: Optional[Sprites] = None
-    stats: List[Stat] = Field(default_factory=list)
-    types: List[PokemonType] = Field(default_factory=list)
+    stats: list[Stat] = Field(default_factory=list)
+    types: list[PokemonType] = Field(default_factory=list)
 
 
 # Pagination models
@@ -150,4 +152,4 @@ class PokemonList(BaseModel):
     count: int
     next: Optional[str] = None
     previous: Optional[str] = None
-    results: List[NamedResource] = Field(default_factory=list)
+    results: list[NamedResource] = Field(default_factory=list)

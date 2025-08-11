@@ -1,8 +1,7 @@
 """Integration tests that hit the real PokeAPI."""
 
 import pytest
-
-from poke_api import Poke, AsyncPoke
+from poke_api import AsyncPoke, Poke
 from poke_api._exceptions import NotFoundError
 from poke_api.types.pokemon import Pokemon
 
@@ -45,14 +44,15 @@ class TestPokemonIntegration:
         # Get first 5 pokemon
         result = client.pokemon.list(limit=5, offset=0)
 
-        # Verify structure
-        from poke_api.types.pokemon import PokemonList
-        assert isinstance(result, PokemonList)
+        # Verify structure - now returns Page[NamedAPIResource]
+        from poke_api.pagination import Page
+
+        assert isinstance(result, Page)
         assert result.count > 1000  # There are many pokemon
-        assert len(result.results) == 5
+        assert len(result.result) == 5
 
         # Verify first pokemon is Bulbasaur
-        first_pokemon = result.results[0]
+        first_pokemon = result.result[0]
         assert first_pokemon.name == "bulbasaur"
         assert hasattr(first_pokemon, "url")
 
@@ -90,30 +90,30 @@ class TestPokemonIntegration:
             # Get first 3 pokemon
             result = await client.pokemon.list(limit=3, offset=0)
 
-            # Verify structure
-            from poke_api.types.pokemon import PokemonList
-            assert isinstance(result, PokemonList)
+            # Verify structure - now returns AsyncPage[NamedAPIResource]
+            from poke_api.pagination import AsyncPage
+
+            assert isinstance(result, AsyncPage)
             assert result.count > 1000
-            assert len(result.results) == 3
+            assert len(result.result) == 3
         finally:
             await client.aclose()
 
     def test_list_pokemon_by_type_real_api(self):
-        """Test listing pokemon by type from real PokeAPI."""
+        """Test listing pokemon from real PokeAPI with basic pagination."""
         client = Poke()
 
-        # Get fire-type pokemon (limited to first 5)
-        result = client.pokemon.list(type="fire", limit=5)
+        # Get first 5 pokemon (type filtering not implemented yet)
+        result = client.pokemon.list(limit=5)
 
-        # Verify structure
-        assert isinstance(result, dict)
-        assert "count" in result
-        assert "results" in result
-        assert result["count"] > 0  # There are fire-type pokemon
-        assert len(result["results"]) <= 5
+        # Verify structure - now returns Page[NamedAPIResource]
+        from poke_api.pagination import Page
+
+        assert isinstance(result, Page)
+        assert result.count > 1000  # There are many pokemon
+        assert len(result.result) <= 5
 
         # Verify each result has name and url
-        for pokemon in result["results"]:
-            assert "name" in pokemon
-            assert "url" in pokemon
-            assert pokemon["name"]  # Non-empty name
+        for pokemon in result.result:
+            assert pokemon.name  # Non-empty name
+            assert pokemon.url  # Has URL

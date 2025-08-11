@@ -24,8 +24,9 @@ fix: handle 404 errors correctly
 
 ```bash
 poetry run pytest              # Run tests
-poetry run ruff check .        # Lint code
+poetry run ruff check . --fix  # Lint and auto-fix code
 poetry run ruff format .       # Format code
+make format                    # Format and lint with auto-fix
 ```
 
 Releases are automated via GitHub Actions when PRs are merged to `main`.

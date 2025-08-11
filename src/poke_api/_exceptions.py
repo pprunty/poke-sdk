@@ -61,16 +61,16 @@ class ServiceUnavailableError(ServerError):
 
 def map_http_error(status_code: int, body: Any = None) -> APIStatusError:
     """Map HTTP status codes to appropriate exception classes.
-    
+
     Args:
         status_code: HTTP status code
         body: Response body (optional)
-        
+
     Returns:
         Appropriate APIStatusError subclass instance
     """
     message = str(body) if body else None
-    
+
     # Client errors (4xx)
     if status_code == 400:
         return BadRequestError(status_code, message)
@@ -86,14 +86,14 @@ def map_http_error(status_code: int, body: Any = None) -> APIStatusError:
         return UnprocessableEntityError(status_code, message)
     elif status_code == 429:
         return RateLimitError(status_code, "Rate limited")
-    
+
     # Server errors (5xx)
     elif 500 <= status_code < 600:
         if status_code in (502, 503, 504):
             return ServiceUnavailableError(status_code, message)
         else:
             return ServerError(status_code, message)
-    
+
     # Fallback for other status codes
     else:
         return APIStatusError(status_code, message)

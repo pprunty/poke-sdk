@@ -1,20 +1,19 @@
 """Tests for HTTP error mapping and exception handling."""
 
-import pytest
 from unittest.mock import MagicMock
 
 from poke_api._exceptions import (
-    PokeAPIError,
     APIStatusError,
     BadRequestError,
-    UnauthorizedError,
+    ConflictError,
     ForbiddenError,
     NotFoundError,
-    ConflictError,
-    UnprocessableEntityError,
+    PokeAPIError,
     RateLimitError,
     ServerError,
     ServiceUnavailableError,
+    UnauthorizedError,
+    UnprocessableEntityError,
     map_http_error,
 )
 
@@ -160,7 +159,7 @@ class TestExceptionMapping:
         assert issubclass(RateLimitError, APIStatusError)
         assert issubclass(ServerError, APIStatusError)
         assert issubclass(ServiceUnavailableError, ServerError)
-        
+
         # Test base inheritance
         assert issubclass(APIStatusError, PokeAPIError)
         assert issubclass(PokeAPIError, Exception)
@@ -194,10 +193,10 @@ class TestExceptionProperties:
             (ServerError(500, "Server error"), 500),
             (ServiceUnavailableError(503, "Unavailable"), 503),
         ]
-        
+
         for error, expected_code in errors:
             assert error.status_code == expected_code
-            assert hasattr(error, 'status_code')
+            assert hasattr(error, "status_code")
 
 
 class TestSafeGetResponseBody:
@@ -206,12 +205,12 @@ class TestSafeGetResponseBody:
     def test_json_response_body(self):
         """Test extracting JSON response body."""
         from poke_api._client import _safe_get_response_body
-        
+
         # Mock response with JSON
         mock_response = MagicMock()
         mock_response.json.return_value = {"error": "not found", "code": 404}
         mock_response.text = '{"error": "not found", "code": 404}'
-        
+
         body = _safe_get_response_body(mock_response)
         assert "not found" in body
         assert "404" in body
@@ -219,25 +218,25 @@ class TestSafeGetResponseBody:
     def test_text_response_body_fallback(self):
         """Test fallback to text when JSON parsing fails."""
         from poke_api._client import _safe_get_response_body
-        
+
         # Mock response that raises exception on json()
         mock_response = MagicMock()
         mock_response.json.side_effect = ValueError("Invalid JSON")
         mock_response.text = "Plain text error message"
-        
+
         body = _safe_get_response_body(mock_response)
         assert body == "Plain text error message"
 
     def test_long_text_response_truncation(self):
         """Test that long text responses are truncated."""
         from poke_api._client import _safe_get_response_body
-        
+
         # Mock response with very long text
         long_text = "x" * 300  # Longer than 200 chars
         mock_response = MagicMock()
         mock_response.json.side_effect = ValueError("Invalid JSON")
         mock_response.text = long_text
-        
+
         body = _safe_get_response_body(mock_response)
         assert len(body) == 200
         assert body == "x" * 200

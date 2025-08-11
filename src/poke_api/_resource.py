@@ -1,19 +1,21 @@
 """Base resource classes for PokeAPI resources."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypeVar, Generic, Dict, Any
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from cachetools import TTLCache, cachedmethod
 
 if TYPE_CHECKING:
-    from ._client import Poke, AsyncPoke
+    from ._client import AsyncPoke, Poke
 
 T = TypeVar("T")
 
 
 class HTTPMethod:
     """HTTP method constants."""
+
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
@@ -24,12 +26,12 @@ class HTTPMethod:
 class BaseResource(ABC, Generic[T]):
     """Base synchronous resource class."""
 
-    def __init__(self, client: "Poke") -> None:
+    def __init__(self, client: Poke) -> None:
         self._client = client
         self._cache = TTLCache(maxsize=1024, ttl=60)
 
     @cachedmethod(lambda self: self._cache)
-    def _get_json(self, path: str) -> Dict[str, Any]:
+    def _get_json(self, path: str) -> dict[str, Any]:
         """Helper to make GET request and return JSON with caching."""
         r = self._client._request(HTTPMethod.GET, path)
         return r.json()
@@ -40,7 +42,7 @@ class BaseResource(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def list(self, *, limit: int = 20, offset: int = 0, **kwargs) -> Dict[str, Any]:
+    def list(self, *, limit: int = 20, offset: int = 0, **kwargs) -> dict[str, Any]:
         """List resources with pagination."""
         pass
 
@@ -48,34 +50,35 @@ class BaseResource(ABC, Generic[T]):
 class BaseAsyncResource(ABC, Generic[T]):
     """Base asynchronous resource class."""
 
-    def __init__(self, client: "AsyncPoke") -> None:
+    def __init__(self, client: AsyncPoke) -> None:
         self._client = client
         self._cache = TTLCache(maxsize=1024, ttl=60)
 
-    async def _get_json(self, path: str, **kwargs) -> Dict[str, Any]:
+    async def _get_json(self, path: str, **kwargs) -> dict[str, Any]:
         """Helper to make GET request and return JSON with caching and de-duplication."""
         import asyncio
-        
+
         # Construct the full URL for the lock key (including query params)
         full_url = self._client._join(path)
-        if 'params' in kwargs and kwargs['params']:
+        if "params" in kwargs and kwargs["params"]:
             import urllib.parse
-            query_string = urllib.parse.urlencode(kwargs['params'])
+
+            query_string = urllib.parse.urlencode(kwargs["params"])
             full_url = f"{full_url}?{query_string}"
-        
+
         # Get or create a lock for this specific URL
         lock = self._client._locks.setdefault(full_url, asyncio.Lock())
-        
+
         async with lock:
             try:
                 # Check cache first (double-checked locking pattern)
                 if full_url in self._cache:
                     return self._cache[full_url]
-                
+
                 # Cache miss - make request
                 r = await self._client._request(HTTPMethod.GET, path, **kwargs)
                 result = r.json()
-                
+
                 # Store in cache using full URL as key
                 self._cache[full_url] = result
                 return result
@@ -104,6 +107,6 @@ class BaseAsyncResource(ABC, Generic[T]):
     @abstractmethod
     async def list(
         self, *, limit: int = 20, offset: int = 0, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """List resources with pagination."""
         pass

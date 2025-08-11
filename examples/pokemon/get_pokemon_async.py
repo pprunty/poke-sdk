@@ -6,6 +6,7 @@ Demonstrates async Pokemon retrieval with proper resource management.
 """
 
 import asyncio
+
 from poke_api import AsyncPoke
 from poke_api._exceptions import NotFoundError
 
