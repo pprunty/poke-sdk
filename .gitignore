@@ -1,0 +1,242 @@
+# ===================================
+# Python SDK Production .gitignore
+# ===================================
+
+# === Byte-compiled / optimized / DLL files ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# === C extensions ===
+*.so
+
+# === Distribution / packaging ===
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# === PyInstaller ===
+*.manifest
+*.spec
+
+# === Installer logs ===
+pip-log.txt
+pip-delete-this-directory.txt
+
+# === Unit test / coverage reports ===
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# === Translations ===
+*.mo
+*.pot
+
+# === Django stuff ===
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# === Flask stuff ===
+instance/
+.webassets-cache
+
+# === Scrapy stuff ===
+.scrapy
+
+# === Sphinx documentation ===
+docs/_build/
+docs/.doctrees/
+docs/build/
+
+# === PyBuilder ===
+target/
+
+# === Jupyter Notebook ===
+.ipynb_checkpoints
+
+# === IPython ===
+profile_default/
+ipython_config.py
+
+# === pyenv ===
+.python-version
+
+# === Poetry ===
+poetry.lock
+.venv
+venv/
+ENV/
+env/
+.ENV
+.env
+
+# === Pipenv ===
+Pipfile.lock
+
+# === PEP 582 ===
+__pypackages__/
+
+# === Celery stuff ===
+celerybeat-schedule
+celerybeat.pid
+
+# === SageMath parsed files ===
+*.sage.py
+
+# === Environments ===
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# === Spyder project settings ===
+.spyderproject
+.spyproject
+
+# === Rope project settings ===
+.ropeproject
+
+# === mkdocs documentation ===
+/site
+
+# === mypy ===
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# === Pyre type checker ===
+.pyre/
+
+# === pytype static type analyzer ===
+.pytype/
+
+# === Cython debug symbols ===
+cython_debug/
+
+# === IDEs and Editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# === OS-specific ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# === SDK specific ===
+# API keys and secrets
+secrets.json
+.secrets
+*.key
+*.pem
+credentials/
+auth/
+
+# Development and testing
+dev/
+scratch/
+playground/
+examples/local/
+test_outputs/
+test_data/local/
+
+# Performance and profiling
+*.prof
+profile_*.txt
+.profile
+
+# Local configuration
+config.local.json
+settings.local.py
+local_settings.py
+
+# === Documentation ===
+# Generated docs
+docs/build/
+docs/_build/
+docs/.doctrees/
+site/
+
+# === Packaging and Distribution ===
+# Build artifacts
+build/
+dist/
+*.tar.gz
+*.whl
+*.egg
+
+# PyPI uploads
+upload/
+release/
+
+# === CI/CD specific ===
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+.nyc_output
+
+# Logs
+logs/
+*.log
+
+# === Temporary files ===
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+
+# === Cache directories ===
+.cache/
+.pytest_cache/
+.ruff_cache/
+.black_cache/
+
+# === Lock files (keep poetry.lock for SDKs) ===
+# Uncomment if you want to ignore poetry.lock
+# poetry.lock
+
+# === Sample/Example files ===
+examples/secrets.py
+examples/*.key
+samples/local/

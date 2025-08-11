@@ -1,0 +1,30 @@
+[project]
+name = "poke_api"
+version = "0.1.0"
+description = "SDK (Software Development Kit) for Pokemon APIs"
+authors = [
+    {name = "pprunty",email = "patrickprunty.business@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8.1"
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "cachetools>=5.0.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0"
+]
+dev = [
+    "black>=23.0.0",
+    "flake8>=6.0.0"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
