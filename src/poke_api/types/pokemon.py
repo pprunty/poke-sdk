@@ -69,13 +69,13 @@ class Move(BaseModel):
     """Pokemon move information."""
 
     move: NamedResource
-    version_group_details: List["VersionGroupDetail"]
+    version_group_details: List[VersionGroupDetail]
 
 
 class PastAbility(BaseModel):
     """Past generation ability information."""
 
-    abilities: List["Ability"]
+    abilities: List[Ability]
     generation: NamedResource
 
 
@@ -90,7 +90,7 @@ class PastType(BaseModel):
     """Past generation type information."""
 
     generation: NamedResource
-    types: List["PokemonType"]
+    types: List[PokemonType]
 
 
 class Sprites(BaseModel):
@@ -128,18 +128,18 @@ class Pokemon(BaseModel):
     order: int
     location_area_encounters: str
 
-    abilities: List["Ability"] = Field(default_factory=list)
+    abilities: List[Ability] = Field(default_factory=list)
     cries: Optional[Cries] = None
-    forms: List["NamedResource"] = Field(default_factory=list)
-    game_indices: List["GameIndex"] = Field(default_factory=list)
-    held_items: List["HeldItem"] = Field(default_factory=list)
-    moves: List["Move"] = Field(default_factory=list)
-    past_abilities: List["PastAbility"] = Field(default_factory=list)
-    past_types: List["PastType"] = Field(default_factory=list)
+    forms: List[NamedResource] = Field(default_factory=list)
+    game_indices: List[GameIndex] = Field(default_factory=list)
+    held_items: List[HeldItem] = Field(default_factory=list)
+    moves: List[Move] = Field(default_factory=list)
+    past_abilities: List[PastAbility] = Field(default_factory=list)
+    past_types: List[PastType] = Field(default_factory=list)
     species: NamedResource
     sprites: Optional[Sprites] = None
-    stats: List["Stat"] = Field(default_factory=list)
-    types: List["PokemonType"] = Field(default_factory=list)
+    stats: List[Stat] = Field(default_factory=list)
+    types: List[PokemonType] = Field(default_factory=list)
 
 
 # Pagination models
@@ -149,4 +149,4 @@ class PokemonList(BaseModel):
     count: int
     next: Optional[str] = None
     previous: Optional[str] = None
-    results: List["NamedResource"] = Field(default_factory=list)
+    results: List[NamedResource] = Field(default_factory=list)

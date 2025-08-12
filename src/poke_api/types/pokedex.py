@@ -14,8 +14,8 @@ class PokedexRankRow(BaseModel):
     regional_no: Optional[int] = None  # entry number in the provided pokedex
     national_no: int                   # species.id
     name: str
-    types: list[str] = Field(default_factory=list)  # ["psychic"] or ["psychic","ice"]
-    base_stats: dict[str, int] = Field(default_factory=dict)  # {"hp":106,"attack":110,...}
+    types: List[str] = Field(default_factory=list)  # ["psychic"] or ["psychic","ice"]
+    base_stats: Dict[str, int] = Field(default_factory=dict)  # {"hp":106,"attack":110,...}
     total_base_stat: int
     sprite_url: Optional[str] = None
 
@@ -65,11 +65,11 @@ class PokedexDetailView(BaseModel):
     """Complete Pokemon detail view (Serebii-style)."""
     
     name: str
-    other_names: list[LocalizedName] = Field(default_factory=list)
+    other_names: List[LocalizedName] = Field(default_factory=list)
     national_no: int
     regional_no: Optional[int] = None
     gender_ratio: str  # "M 87.5% / F 12.5%" or "Genderless"
-    types: list[str] = Field(default_factory=list)
+    types: List[str] = Field(default_factory=list)
     classification: Optional[str] = None  # genus (en)
     height_m: float
     height_ft_in: str  # "6'07\""
@@ -79,15 +79,15 @@ class PokedexDetailView(BaseModel):
     base_egg_steps: int
     growth_rate: str
     base_happiness: int
-    ev_yields: list[EVYield] = Field(default_factory=list)
-    damage_taken: list[DamageTakenEntry] = Field(default_factory=list)
-    wild_held_items: dict[str, list[str]] = Field(default_factory=dict)  # version -> [items]
-    egg_groups: list[str] = Field(default_factory=list)
-    evolution_chain: list[str] = Field(default_factory=list)  # species names in order
-    locations: list[LocationEntry] = Field(default_factory=list)
-    level_up_moves: list[MoveLearn] = Field(default_factory=list)
-    tm_hm_moves: list[MoveLearn] = Field(default_factory=list)
-    tutor_moves: list[MoveLearn] = Field(default_factory=list)
-    gen1_only_moves: list[MoveLearn] = Field(default_factory=list)  # moves present in Gen 1 not in target gen
+    ev_yields: List[EVYield] = Field(default_factory=list)
+    damage_taken: List[DamageTakenEntry] = Field(default_factory=list)
+    wild_held_items: Dict[str, List[str]] = Field(default_factory=dict)  # version -> [items]
+    egg_groups: List[str] = Field(default_factory=list)
+    evolution_chain: List[str] = Field(default_factory=list)  # species names in order
+    locations: List[LocationEntry] = Field(default_factory=list)
+    level_up_moves: List[MoveLearn] = Field(default_factory=list)
+    tm_hm_moves: List[MoveLearn] = Field(default_factory=list)
+    tutor_moves: List[MoveLearn] = Field(default_factory=list)
+    gen1_only_moves: List[MoveLearn] = Field(default_factory=list)  # moves present in Gen 1 not in target gen
     sprite_url: Optional[str] = None
     shiny_sprite_url: Optional[str] = None
