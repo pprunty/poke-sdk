@@ -4,7 +4,7 @@
 
 ![header](./header.png)
 
-The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8 applications (haven't tested on other versions). The library includes type definitions for PokeAPI endpoints (`/pokemon/{id or name}` and `/generation/{id or name}`), plus custom high-level resources built on top of the API for enhanced functionality. The library also offers both synchronous and asynchronous clients, pagination (with lazy loading), and custom caching and retries powered by httpx, cachetools and pydantic libraries.
+The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8+ applications. The library includes type definitions for PokeAPI endpoints (`/pokemon/{id or name}` and `/generation/{id or name}`), plus custom high-level resources built on top of the API for enhanced functionality. The library also offers both synchronous and asynchronous clients, pagination (with lazy loading), and custom caching and retries powered by httpx, cachetools and pydantic libraries.
 
 Thanks to [PokeAPI](https://pokeapi.co/) for maintaining and making the APIs publicly accessible.
 

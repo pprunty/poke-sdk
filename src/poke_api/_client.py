@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from typing import Union, List
 
 import httpx
 
@@ -29,7 +30,7 @@ class BaseClient:
     def __init__(
         self,
         *,
-        base_url: str | httpx.URL = DEFAULT_BASE_URL,
+        base_url: Union[str, httpx.URL] = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         # Defaults kick in here if you don't pass anything
@@ -41,7 +42,7 @@ class BaseClient:
         return self._base_url
 
     @base_url.setter
-    def base_url(self, url: str | httpx.URL) -> None:
+    def base_url(self, url: Union[str, httpx.URL]) -> None:
         self._base_url = httpx.URL(str(url).rstrip("/"))
 
     @property
@@ -62,7 +63,7 @@ class Poke(BaseClient):
     def __init__(
         self,
         *,
-        base_url: str | httpx.URL = DEFAULT_BASE_URL,
+        base_url: Union[str, httpx.URL] = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         super().__init__(base_url=base_url, timeout=timeout)
@@ -165,7 +166,7 @@ class Poke(BaseClient):
         self,
         obj: object,
         *,
-        paths: list[str] | None = None,
+        paths: Union[List[str], None] = None,
         depth: int = 1,
         max_requests: int = 200,
     ) -> dict:
@@ -181,12 +182,12 @@ class AsyncPoke(BaseClient):
     def __init__(
         self,
         *,
-        base_url: str | httpx.URL = DEFAULT_BASE_URL,
+        base_url: Union[str, httpx.URL] = DEFAULT_BASE_URL,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         super().__init__(base_url=base_url, timeout=timeout)
         self._client = httpx.AsyncClient(timeout=self._timeout)
-        self._locks: dict[str, asyncio.Lock] = {}
+        self._locks: dict = {}
         from .resources.generation import AsyncGenerationResource
         from .resources.pokemon import AsyncPokemonResource
         from .resources.search import AsyncSearchResource
@@ -292,7 +293,7 @@ class AsyncPoke(BaseClient):
         self,
         obj: object,
         *,
-        paths: list[str] | None = None,
+        paths: Union[List[str], None] = None,
         depth: int = 1,
         max_requests: int = 200,
         concurrency: int = 6,

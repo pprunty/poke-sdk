@@ -1,6 +1,6 @@
 # src/poke_api/_exceptions.py
 
-from typing import Any
+from typing import Any, Union
 
 
 class PokeAPIError(Exception):
@@ -18,7 +18,7 @@ class APITimeoutError(PokeAPIError):
 class APIStatusError(PokeAPIError):
     """Non-2xx HTTP status."""
 
-    def __init__(self, status_code: int, message: str | None = None):
+    def __init__(self, status_code: int, message: Union[str, None] = None):
         self.status_code = status_code
         super().__init__(message or f"HTTP {status_code}")
 
@@ -78,6 +78,7 @@ def map_http_error(status_code: int, body: Any = None) -> APIStatusError:
         # Never going to happen, but included for completeness
         return UnauthorizedError(status_code, message)
     elif status_code == 403:
+        # ^ Likewise
         return ForbiddenError(status_code, message)
     elif status_code == 404:
         return NotFoundError(status_code, message)

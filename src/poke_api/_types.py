@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Union, List
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict
@@ -80,7 +80,7 @@ class BaseModel(PydanticBaseModel):
 
         return f"{self.__class__.__name__}({', '.join(parts)})"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict:
         """Convert to dictionary representation."""
         return self.model_dump()
 
@@ -121,9 +121,9 @@ class NamedAPIResourceList(BaseModel):
     """List of named API resources with pagination info."""
 
     count: int
-    next: str | None = None
-    previous: str | None = None
-    results: list[NamedAPIResource]
+    next: Union[str, None] = None
+    previous: Union[str, None] = None
+    results: List[NamedAPIResource]
 
 
 class Name(BaseModel):
