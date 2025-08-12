@@ -1,9 +1,6 @@
 """Pokemon-related Pydantic models."""
 
-from __future__ import annotations
-
-from typing import Any, Optional
-
+from typing import List, Optional, Dict, Any
 from pydantic import Field
 
 from .._types import BaseModel, NamedResource
@@ -35,7 +32,7 @@ class HeldItem(BaseModel):
     """Pokemon held item information."""
 
     item: NamedResource
-    version_details: list[VersionDetail]
+    version_details: List["VersionDetail"]
 
 
 class VersionDetail(BaseModel):
@@ -45,26 +42,40 @@ class VersionDetail(BaseModel):
     version: NamedResource
 
 
+class MoveLearnMethod(BaseModel):
+    """How a Pokemon learns a move."""
+
+    name: str
+    url: str
+
+
+class VersionGroup(BaseModel):
+    """Version group information."""
+
+    name: str
+    url: str
+
+
 class VersionGroupDetail(BaseModel):
     """Version group specific move learning details."""
 
     level_learned_at: int
-    move_learn_method: NamedResource
+    move_learn_method: MoveLearnMethod
     order: Optional[int]
-    version_group: NamedResource
+    version_group: VersionGroup
 
 
 class Move(BaseModel):
     """Pokemon move information."""
 
     move: NamedResource
-    version_group_details: list[VersionGroupDetail]
+    version_group_details: List["VersionGroupDetail"]
 
 
 class PastAbility(BaseModel):
     """Past generation ability information."""
 
-    abilities: list[Ability]
+    abilities: List["Ability"]
     generation: NamedResource
 
 
@@ -79,7 +90,7 @@ class PastType(BaseModel):
     """Past generation type information."""
 
     generation: NamedResource
-    types: list[PokemonType]
+    types: List["PokemonType"]
 
 
 class Sprites(BaseModel):
@@ -93,8 +104,8 @@ class Sprites(BaseModel):
     front_female: Optional[str] = None
     front_shiny: Optional[str] = None
     front_shiny_female: Optional[str] = None
-    other: Optional[dict[str, Any]] = None
-    versions: Optional[dict[str, Any]] = None
+    other: Optional[Dict[str, Any]] = None
+    versions: Optional[Dict[str, Any]] = None
 
 
 class Stat(BaseModel):
@@ -117,18 +128,18 @@ class Pokemon(BaseModel):
     order: int
     location_area_encounters: str
 
-    abilities: list[Ability] = Field(default_factory=list)
+    abilities: List["Ability"] = Field(default_factory=list)
     cries: Optional[Cries] = None
-    forms: list[NamedResource] = Field(default_factory=list)
-    game_indices: list[GameIndex] = Field(default_factory=list)
-    held_items: list[HeldItem] = Field(default_factory=list)
-    moves: list[Move] = Field(default_factory=list)
-    past_abilities: list[PastAbility] = Field(default_factory=list)
-    past_types: list[PastType] = Field(default_factory=list)
+    forms: List["NamedResource"] = Field(default_factory=list)
+    game_indices: List["GameIndex"] = Field(default_factory=list)
+    held_items: List["HeldItem"] = Field(default_factory=list)
+    moves: List["Move"] = Field(default_factory=list)
+    past_abilities: List["PastAbility"] = Field(default_factory=list)
+    past_types: List["PastType"] = Field(default_factory=list)
     species: NamedResource
     sprites: Optional[Sprites] = None
-    stats: list[Stat] = Field(default_factory=list)
-    types: list[PokemonType] = Field(default_factory=list)
+    stats: List["Stat"] = Field(default_factory=list)
+    types: List["PokemonType"] = Field(default_factory=list)
 
 
 # Pagination models
@@ -138,4 +149,4 @@ class PokemonList(BaseModel):
     count: int
     next: Optional[str] = None
     previous: Optional[str] = None
-    results: list[NamedResource] = Field(default_factory=list)
+    results: List["NamedResource"] = Field(default_factory=list)

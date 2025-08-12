@@ -14,7 +14,7 @@ The REST API documentation can be found at <pokeapi.co/docs>. The live site cras
 
 ## Requirements
 
-* python 3.8
+* python 3.8+
 * [Poetry](https://python-poetry.org/) python dependency and project manager (`curl -sSL https://install.python-poetry.org | python3 -` or `pip install poetry`)
 
 ## Installation
