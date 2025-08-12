@@ -84,12 +84,15 @@ Direct wrappers around PokeAPI endpoints:
 - **`client.pokemon.get/list()`**: `/pokemon/{id or name}` - Individual Pokemon data
 - **`client.generation.get/list()`**: `/generation/{id or name}` - Generation information
 
+These resources are subclasses which inherit from the `[BaseResource](./src/poke_api/_resource.py)`.
+
 ### Custom Resources
 High-level functionality built on top of the PokeAPI:
 
 - **`client.pokedex.detail/ranking()`**: Comprehensive Pokemon views with rankings and detailed information (like [serebii.net](https://serebii.net/pokedex))
 - **`client.search.pokemon/generation().`**: Cross-resource search capabilities
 
+Note: The `pokedex` and `search` custom resources are not based on the `[BaseResource](./src/poke_api/_resource.py)` and therefore do not inherit methods for `list` and `get`.
 
 ## Object Representation
 
@@ -374,10 +377,10 @@ Example ranking output:
 ```python
 from poke_api import AsyncPoke, Poke
 
-# Get by number (original way)
+# Get by number
 mewtwo_detail = await client.pokedex.detail(generation=1, number=150)
 
-# Get by name (new way)
+# Get by name
 mewtwo_detail = await client.pokedex.detail(generation=1, name="mewtwo")
 
 print(mewtwo_detail.to_json())
@@ -745,7 +748,7 @@ except NotFoundError as e:
 │   ├── _types.py               # Common types and BaseModel with friendly printing
 │   ├── pagination.py           # Page/AsyncPage classes with auto-iteration
 │   ├── expansion.py            # For handling subsequent APIs for NamedResources (name+url return objects)
-│   ├── resources/              # API resource implementations (pokemon, generation)
+│   ├── resources/              # API resource implementations (pokemon, generation, search, pokedex)
 │   └── types/                  # Pydantic models for API responses
 ├── tests/                      # Unit and integration tests
 ├── examples/                   # Usage examples organized by resource type
