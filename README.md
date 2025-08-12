@@ -1,6 +1,8 @@
 # PokeAPI Python API Library
 
-[![PyPI version](https://badge.fury.io/py/poke-sdk.svg)](https://badge.fury.io/py/poke-sdk)
+**Version**: 0.1.0 (Development)
+
+> **Note**: This is currently a development version. For production use, please wait for the official PyPI release or install from source.
 
 ![header](./header.png)
 
@@ -45,10 +47,10 @@ The file path should start with `examples/*`
 ### pip
 
 > [!WARNING]
-> I haven't pushed this to PyPi (yet)
+> This package has not been published to PyPI yet. Use the development installation method above.
 
 ```bash
-pip install poke_sdk
+pip install poke-sdk
 ```
 
 ## Usage
