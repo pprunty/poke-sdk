@@ -191,6 +191,49 @@ EVOLUTION_CHAIN_DATA = {
     },
 }
 
+# Mock move data
+MOVE_CONFUSION_DATA = {
+    "id": 93,
+    "name": "confusion",
+    "type": {"name": "psychic", "url": "https://pokeapi.co/api/v2/type/14/"},
+    "power": 50,
+    "accuracy": 100,
+    "pp": 25,
+    "damage_class": {
+        "name": "special",
+        "url": "https://pokeapi.co/api/v2/move-damage-class/3/",
+    },
+    "priority": 0,
+}
+
+MOVE_PSYCHIC_DATA = {
+    "id": 94,
+    "name": "psychic",
+    "type": {"name": "psychic", "url": "https://pokeapi.co/api/v2/type/14/"},
+    "power": 90,
+    "accuracy": 100,
+    "pp": 10,
+    "damage_class": {
+        "name": "special",
+        "url": "https://pokeapi.co/api/v2/move-damage-class/3/",
+    },
+    "priority": 0,
+}
+
+MOVE_THUNDER_WAVE_DATA = {
+    "id": 86,
+    "name": "thunder-wave",
+    "type": {"name": "electric", "url": "https://pokeapi.co/api/v2/type/13/"},
+    "power": None,
+    "accuracy": 90,
+    "pp": 20,
+    "damage_class": {
+        "name": "status",
+        "url": "https://pokeapi.co/api/v2/move-damage-class/1/",
+    },
+    "priority": 0,
+}
+
 ENCOUNTERS_DATA = [
     {
         "location_area": {
@@ -251,6 +294,22 @@ def test_pokedex_detail_sync():
 
             router.get("https://pokeapi.co/api/v2/pokemon/mewtwo/encounters").mock(
                 return_value=Response(200, json=ENCOUNTERS_DATA)
+            )
+
+            # Mock move endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/move/93/").mock(
+                return_value=Response(200, json=MOVE_CONFUSION_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/94/").mock(
+                return_value=Response(200, json=MOVE_PSYCHIC_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/86/").mock(
+                return_value=Response(200, json=MOVE_THUNDER_WAVE_DATA)
+            )
+
+            # Mock type endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/type/14/").mock(
+                return_value=Response(200, json=PSYCHIC_TYPE_DATA)
             )
 
             # Test detail view
@@ -356,6 +415,22 @@ async def test_pokedex_detail_async():
                 return_value=Response(200, json=ENCOUNTERS_DATA)
             )
 
+            # Mock move endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/move/93/").mock(
+                return_value=Response(200, json=MOVE_CONFUSION_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/94/").mock(
+                return_value=Response(200, json=MOVE_PSYCHIC_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/86/").mock(
+                return_value=Response(200, json=MOVE_THUNDER_WAVE_DATA)
+            )
+
+            # Mock type endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/type/14/").mock(
+                return_value=Response(200, json=PSYCHIC_TYPE_DATA)
+            )
+
             # Test detail view with concurrency
             detail = await client.pokedex.detail(
                 pokedex="kanto", number=150, version_group="red-blue", concurrency=3
@@ -456,6 +531,22 @@ def test_version_group_auto_selection():
                 return_value=Response(200, json=ENCOUNTERS_DATA)
             )
 
+            # Mock move endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/move/93/").mock(
+                return_value=Response(200, json=MOVE_CONFUSION_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/94/").mock(
+                return_value=Response(200, json=MOVE_PSYCHIC_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/86/").mock(
+                return_value=Response(200, json=MOVE_THUNDER_WAVE_DATA)
+            )
+
+            # Mock type endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/type/14/").mock(
+                return_value=Response(200, json=PSYCHIC_TYPE_DATA)
+            )
+
             # Test without explicit version_group - should auto-pick red-blue for kanto
             detail = client.pokedex.detail(pokedex="kanto", number=150)
 
@@ -492,6 +583,22 @@ def test_resolve_number_by_name():
             )
             router.get("https://pokeapi.co/api/v2/pokemon/mewtwo/encounters").mock(
                 return_value=Response(200, json=ENCOUNTERS_DATA)
+            )
+
+            # Mock move endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/move/93/").mock(
+                return_value=Response(200, json=MOVE_CONFUSION_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/94/").mock(
+                return_value=Response(200, json=MOVE_CONFUSION_DATA)
+            )
+            router.get("https://pokeapi.co/api/v2/move/86/").mock(
+                return_value=Response(200, json=MOVE_THUNDER_WAVE_DATA)
+            )
+
+            # Mock type endpoints for expand method
+            router.get("https://pokeapi.co/api/v2/type/14/").mock(
+                return_value=Response(200, json=PSYCHIC_TYPE_DATA)
             )
 
             # Test with Pokemon name instead of number

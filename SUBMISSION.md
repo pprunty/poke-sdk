@@ -16,11 +16,11 @@ Most design decisions for this assignment are documented or covered in the [./RE
 * ruff - usually use black+flake8 but discovered ruff during developing this project and works pretty nicely
 * Strongly types (py.typed, pydantic) - this is to help IDEs and devlopers using the library. really think python could benefit from going fully typed as a language
 * Async/sync usage - yep, this was to support asynchronous calls, maybe not necessary but i guessed it would be handy for somebody using library inside framework like FastAPI where client would be served paginated data 
-* Pagination - first time doing this proper but got some help from claude code and found out what a semaphore is proper
+* Pagination - first time doing this proper but got some help from claude code and found out some new things, like what a 'semaphore' is
 * Caching - used cachetools for this, speeds up reserving data very quickly using in memory cache, belive this would be beneficial if serving site like serebii where user will be going back and forth between pokemon in a pokedex and main pokedex listing
 * PyPI - didn't push anything to pypi for this, setup some github actions but haven't run anything, maybe could do it in the future
-* Tests - i used pytest and pytest-cov (for coverage report) for both unit and integration tests, most tests I used Claude Code to create whilst developing new parts of the library
-* `search` and `pokedex` resources - i found the apis pretty hard to work with if ever i wanted to serve some information on a UI. so i created both a search and pokedex resource, which would amalgamate some API calles to the PokeAPI APIs to do 1. search: for pokemon by ability, type, starts_with and 2. pokedex: custom pokedex for getting a pokemon information by game/generation (like on [serebii.next](https://serebii.next))
+* Tests - i used pytest and pytest-cov (for coverage report) for both unit and integration tests, most tests I used claude code to create whilst developing new parts of the library
+* `search` and `pokedex` resources - i found the apis pretty hard to work with if ever i wanted to serve some information on a UI. so i created both a search and pokedex resource, which would amalgamate some API calles to the PokeAPI APIs to do 1. search: for pokemon by ability, type, starts_with and 2. pokedex: custom pokedex for getting a pokemon information by game/generation (like on [serebii.next](https://serebii.next)) - this resource was hacked together using claude code just to have a good use case as part of this submission and can definitely be optimized
 * `expand()` method on the `_resource.py` - allows users to explore the objects more deeply by fetching apis in named resource with name+url keys for subsequent api direction.
 
 ## Challenges

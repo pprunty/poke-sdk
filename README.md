@@ -4,7 +4,7 @@
 
 ![header](./header.png)
 
-The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8 applications (haven't tested on other versions). The library includes type definitions for its two core APIs (`/pokemon/{id or name}` and `/generation/{id or name}`), including request params and response fields, and offers both synchronous and asynchronous clients, pagination (with lazy loading), and custom caching and retries powered by httpx, cachetools and pydantic libraries.
+The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8 applications (haven't tested on other versions). The library includes type definitions for PokeAPI endpoints (`/pokemon/{id or name}` and `/generation/{id or name}`), plus custom high-level resources built on top of the API for enhanced functionality. The library also offers both synchronous and asynchronous clients, pagination (with lazy loading), and custom caching and retries powered by httpx, cachetools and pydantic libraries.
 
 Thanks to [PokeAPI](https://pokeapi.co/) for maintaining and making the APIs publicly accessible.
 
@@ -75,6 +75,21 @@ async def main() -> None:
     pikachu = await client.pokemon.get(name="pikachu")
     print(pikachu)
 ```
+
+## Resources
+
+### Core API Resources
+Direct wrappers around PokeAPI endpoints:
+
+- **`client.pokemon.get/list()`**: `/pokemon/{id or name}` - Individual Pokemon data
+- **`client.generation.get/list()`**: `/generation/{id or name}` - Generation information
+
+### Custom Resources
+High-level functionality built on top of the PokeAPI:
+
+- **`client.pokedex.detail/ranking()`**: Comprehensive Pokemon views with rankings and detailed information (like [serebii.net](https://serebii.net/pokedex))
+- **`client.search.pokemon/generation().`**: Cross-resource search capabilities
+
 
 ## Object Representation
 
@@ -231,6 +246,9 @@ with Poke() as client:
 
 ### Pokedex (serebii like views)
 
+> **Note**: This is a custom resource built on top of the PokeAPI, not a direct endpoint wrapper. It combines multiple API calls to provide Serebii-style comprehensive Pokemon views.
+
+
 Comprehensive Pokedex data with rankings tables and detailed Pokemon views. Inspired by views seen on [serebii.net pokedex](https://serebii.net/pokedex).
 
 #### Rankings:
@@ -356,7 +374,12 @@ Example ranking output:
 ```python
 from poke_api import AsyncPoke, Poke
 
+# Get by number (original way)
 mewtwo_detail = await client.pokedex.detail(generation=1, number=150)
+
+# Get by name (new way)
+mewtwo_detail = await client.pokedex.detail(generation=1, name="mewtwo")
+
 print(mewtwo_detail.to_json())
 ```
 
@@ -459,6 +482,61 @@ Example detail output:
 - **Authentic Experience**: Each generation shows only the data that was actually available in those games
 
 > **Note**: Examples use `...` to indicate where additional data would appear in the full response.
+
+### Search - Cross-Resource Discovery
+
+> **Note**: This is a custom resource that searches across multiple PokeAPI endpoints, not a direct API wrapper.
+
+The search functionality provides filtered search across Pokemon with various criteria:
+
+```python
+from poke_api import Poke
+
+client = Poke()
+
+# Search by type
+ground_pokemon = client.search.pokemon(type="ground", limit=5)
+print(f"Found {ground_pokemon.count} ground-type Pokemon")
+for pokemon in ground_pokemon.results:
+    print(f"  - {pokemon.name}")
+
+# Search by ability
+sand_veil_pokemon = client.search.pokemon(ability="sand-veil", limit=3)
+for pokemon in sand_veil_pokemon.results:
+    print(f"  - {pokemon.name}")
+
+# Combined search (type + ability)
+combined = client.search.pokemon(type="ground", ability="sand-veil")
+for pokemon in combined.results:
+    print(f"  - {pokemon.name}")
+```
+
+**Async usage:**
+```python
+from poke_api import AsyncPoke
+
+async def main():
+    async with AsyncPoke() as client:
+        # Search by type with limit
+        fire_pokemon = await client.search.pokemon(type="fire", limit=5)
+        print(f"Search results: {fire_pokemon}")
+        
+        # Access individual results
+        for pokemon in fire_pokemon.results:
+            print(f"  - {pokemon.name}")
+            
+        # Get full details for a specific result
+        detailed = await client.pokemon.get(fire_pokemon.results[0].name)
+        print(f"Full details: {detailed.summary()}")
+
+asyncio.run(main())
+```
+
+**Available search filters:**
+- `type`: Filter by Pokemon type (e.g., "fire", "water", "psychic")
+- `ability`: Filter by ability (e.g., "sand-veil", "levitate")
+- `limit`: Maximum number of results to return
+- Combine multiple filters for precise searches
 
 ## Caching
 

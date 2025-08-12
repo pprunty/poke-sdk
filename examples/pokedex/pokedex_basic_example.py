@@ -23,8 +23,9 @@ async def main():
 
         print(json.dumps(data, indent=2, ensure_ascii=False))
 
-        # Get detailed Mewtwo information from Generation 1
-        mewtwo_detail = await client.pokedex.detail(generation=1, number=150)
+        # Get detailed Mewtwo information from Generation 4
+        # You can use either number or name parameter
+        mewtwo_detail = await client.pokedex.detail(generation=4, name="mewtwo")
         print(mewtwo_detail.to_json())
 
 

@@ -329,7 +329,7 @@ def filter_locations_by_generation(
                 filtered_locations.append(
                     LocationEntry(version=version, location_area=location_area)
                 )
-                break  # Only add each location once per generation
+                # Don't break - allow multiple versions from the same generation
 
     return filtered_locations
 
@@ -720,7 +720,8 @@ class PokedexResource:
         *,
         pokedex: Optional[str] = None,
         generation: Optional[int] = None,
-        number: Union[int, str],
+        number: Optional[Union[int, str]] = None,
+        name: Optional[str] = None,
         version_group: Optional[str] = None,
         sprite_preference: Optional[str] = None,
         concurrency: int = 6,
@@ -732,16 +733,25 @@ class PokedexResource:
         if pokedex is not None and generation is not None:
             raise ValueError("pokedex and generation parameters are mutually exclusive")
 
+        # Validate that either number or name is provided
+        if number is None and name is None:
+            raise ValueError("Either number or name parameter must be provided")
+        if number is not None and name is not None:
+            raise ValueError("number and name parameters are mutually exclusive")
+
+        # Use name if provided, otherwise use number
+        identifier = name if name is not None else number
+
         # Resolve generation to pokedex if needed
         if generation is not None:
             pokedex = self._resolve_generation_to_pokedex(generation)
 
-        # Fetch pokedex entries to resolve number
+        # Fetch pokedex entries to resolve identifier
         pokedex_response = self.client._request("GET", f"/pokedex/{pokedex}")
         pokedex_data = pokedex_response.json()
         pokemon_entries = pokedex_data.get("pokemon_entries", [])
 
-        species_id = resolve_number(pokedex_entries, number)
+        species_id = resolve_number(pokemon_entries, identifier)
 
         # Auto-pick version group if not provided
         if version_group is None:
@@ -1204,7 +1214,8 @@ class AsyncPokedexResource:
         *,
         pokedex: Optional[str] = None,
         generation: Optional[int] = None,
-        number: Union[int, str],
+        number: Optional[Union[int, str]] = None,
+        name: Optional[str] = None,
         version_group: Optional[str] = None,
         sprite_preference: Optional[str] = None,
         concurrency: int = 6,
@@ -1216,16 +1227,49 @@ class AsyncPokedexResource:
         if pokedex is not None and generation is not None:
             raise ValueError("pokedex and generation parameters are mutually exclusive")
 
+        # Validate that either number or name is provided
+        if number is None and name is None:
+            raise ValueError("Either number or name parameter must be provided")
+        if number is not None and name is not None:
+            raise ValueError("number and name parameters are mutually exclusive")
+
+        # Use name if provided, otherwise use number
+        identifier = name if name is not None else number
+
         # Resolve generation to pokedex if needed
         if generation is not None:
             pokedex = await self._resolve_generation_to_pokedex(generation)
 
-        # Fetch pokedex entries to resolve number
+        # Determine generation for filtering
+        generation_num = None
+        if generation is not None:
+            generation_num = generation
+        else:
+            # Try to derive generation from pokedex name
+            pokedex_to_gen = {
+                "kanto": 1,
+                "original-johto": 2,
+                "updated-johto": 2,
+                "hoenn": 3,
+                "original-sinnoh": 4,
+                "extended-sinnoh": 4,
+                "original-unova": 5,
+                "updated-unova": 5,
+                "kalos-central": 6,
+                "kalos-coastal": 6,
+                "kalos-mountain": 6,
+                "original-alola": 7,
+                "updated-alola": 7,
+                "galar": 8,
+            }
+            generation_num = pokedex_to_gen.get(pokedex, 1)
+
+        # Fetch pokedex entries to resolve identifier
         pokedex_response = await self.client._request("GET", f"/pokedex/{pokedex}")
         pokedex_data = pokedex_response.json()
         pokemon_entries = pokedex_data.get("pokemon_entries", [])
 
-        species_id = resolve_number(pokemon_entries, number)
+        species_id = resolve_number(pokemon_entries, identifier)
 
         # Auto-pick version group if not provided
         if version_group is None:
@@ -1378,30 +1422,6 @@ class AsyncPokedexResource:
 
         # Move learning - filter by generation and get complete move info
         pokemon_moves = expanded_pokemon.get("moves", [])
-
-        # Determine generation for filtering
-        generation_num = None
-        if generation is not None:
-            generation_num = generation
-        else:
-            # Try to derive generation from pokedex name
-            pokedex_to_gen = {
-                "kanto": 1,
-                "original-johto": 2,
-                "updated-johto": 2,
-                "hoenn": 3,
-                "original-sinnoh": 4,
-                "extended-sinnoh": 4,
-                "original-unova": 5,
-                "updated-unova": 5,
-                "kalos-central": 6,
-                "kalos-coastal": 6,
-                "kalos-mountain": 6,
-                "original-alola": 7,
-                "updated-alola": 7,
-                "galar": 8,
-            }
-            generation_num = pokedex_to_gen.get(pokedex, 1)
 
         level_up_moves_data = filter_moves_by_generation(
             pokemon_moves, generation_num, "level-up"

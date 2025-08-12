@@ -20,7 +20,6 @@ Key Features:
 """
 
 import asyncio
-import json
 from poke_api import Poke, AsyncPoke
 
 
