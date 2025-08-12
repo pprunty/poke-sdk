@@ -44,7 +44,7 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run pytest --cov=poke_api --cov-report=xml --cov-report=term-missing -v
+        make test
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.8'
@@ -84,13 +84,9 @@ jobs:
     - name: Install project
       run: poetry install --no-interaction
 
-    - name: Run formatting check
+    - name: Run formatting and linting
       run: |
-        poetry run ruff format --check .
-
-    - name: Run linting
-      run: |
-        poetry run ruff check .
+        make format
 
     - name: Run type checking
       run: |

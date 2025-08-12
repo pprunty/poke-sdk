@@ -47,7 +47,7 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run pytest -v
+        make test
 
     - name: Build package
       run: poetry build
