@@ -45,27 +45,15 @@ class VersionDetail(BaseModel):
     version: NamedResource
 
 
-class MoveLearnMethod(BaseModel):
-    """How a Pokemon learns a move."""
-
-    name: str
-    url: str
-
-
-class VersionGroup(BaseModel):
-    """Version group information."""
-
-    name: str
-    url: str
 
 
 class VersionGroupDetail(BaseModel):
     """Version group specific move learning details."""
 
     level_learned_at: int
-    move_learn_method: MoveLearnMethod
+    move_learn_method: NamedResource
     order: Optional[int]
-    version_group: VersionGroup
+    version_group: NamedResource
 
 
 class Move(BaseModel):

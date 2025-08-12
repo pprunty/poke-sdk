@@ -29,6 +29,12 @@ git clone https://github.com/pprunty/poke-sdk.git && cd poke-sdk
 make install
 ```
 
+or:
+
+```bash
+poetry install
+```
+
 **Run examples**:
 
 ```bash
@@ -45,24 +51,6 @@ The file path should start with `examples/*`
 pip install poke_sdk
 ``` -->
 
-## Project Structure
-
-```bash
-.
-├── src/poke_api/               # Main SDK package
-│   ├── _client.py              # Sync/async HTTP clients with retry logic
-│   ├── _exceptions.py          # SDK exception hierarchy
-│   ├── _resource.py            # Base resource classes with caching
-│   ├── _types.py               # Common types and BaseModel with friendly printing
-│   ├── pagination.py           # Page/AsyncPage classes with auto-iteration
-│   ├── resources/              # API resource implementations (pokemon, generation)
-│   └── types/                  # Pydantic models for API responses
-├── tests/                      # Unit and integration tests
-├── examples/                   # Usage examples organized by resource type
-├── pyproject.toml              # Poetry config and dependencies
-└── README.md                   # Documentation
-```
-
 ## Usage
 
 ```python
@@ -74,11 +62,6 @@ client = Poke()
 pikachu = client.pokemon.get(id=25)
 print(pikachu)
 # Output: Pokemon(id=25, name='pikachu', lists={abilities: 2, forms: 1, moves: 105, types: 1})
-
-# List Pokemon with pagination - returns Page[NamedAPIResource]
-pokemon_page = client.pokemon.list(limit=5)
-print(pokemon_page)
-# Output: Page(items=5, count=1302, has_next=True)
 ```
 
 ## Async Usage
@@ -95,7 +78,10 @@ async def main() -> None:
 
 ## Object Representation
 
-Objects print a concise summary by default, showing key fields and list counts. For full data access, use `.to_dict()` or `.to_json()`:
+All models inherit from `BaseModel` and provide:
+* `.to_dict()` - Convert to dictionary representation
+* `.to_json()` - Convert to JSON string representation
+* `.summary()` - Multi-line pretty summary
 
 ```python
 # Friendly printing (default behavior)
@@ -118,24 +104,6 @@ print(pikachu.summary())
 pokemon_dict = pikachu.to_dict()    # Returns dictionary with all fields
 pokemon_json = pikachu.to_json()    # Returns JSON string with all data
 ```
-
-## Types
-
-All models inherit from `BaseModel` and provide:
-* `.to_dict()` - Convert to dictionary representation
-* `.to_json()` - Convert to JSON string representation
-* `.summary()` - Multi-line pretty summary
-
-## Search
-
-
-## Pokédex
-
-[serebii.net](https://serebii.net/pokedex)
-
-> [!WARNING]
-> The 
-
 
 ## Pagination
 
@@ -198,16 +166,216 @@ for pokemon in first_page.result:
 # Add `await` for async usage.
 ```
 
+### Link Expansion (Optional)
+
+`expand` resolves selected `name/url` references into full objects, bounded by depth and max requests.
+It returns a **dict copy** of your model, leaving the original model untouched. Expanded refs store data
+under a reserved `__expanded__` key.
+
+```python
+# Async example
+from poke_api import AsyncPoke
+
+client = AsyncPoke()
+
+async def main():
+    # Get a Pokemon 
+    bulba = await client.pokemon.get("bulbasaur")
+    
+    # Expand the first move reference to get full move data
+    expanded = await client.expand(
+        bulba, 
+        paths=["moves.move"],  # Only expand move references in the moves array
+        depth=1, 
+        max_requests=50, 
+        concurrency=6
+    )
+    
+    # Access expanded data via __expanded__ key
+    first_move = expanded["moves"][0]["move"]
+    print(first_move["name"])  # -> "razor-wind" (original name)
+    print(first_move["__expanded__"]["name"])  # -> "razor-wind" (full move data name)
+    print(first_move["__expanded__"]["power"])  # -> 80 (move power from expanded data)
+
+# Sync example  
+from poke_api import Poke
+
+with Poke() as client:
+    bulba = client.pokemon.get("bulbasaur")
+    expanded = client.expand(
+        bulba, 
+        paths=["moves.move"], 
+        depth=1, 
+        max_requests=50
+    )
+    
+    # Same access pattern
+    move_data = expanded["moves"][0]["move"]["__expanded__"]
+    print(f"Move: {move_data['name']}, Power: {move_data.get('power', 'N/A')}")
+```
+
+**Key Features:**
+- **Non-invasive**: Original models are never modified
+- **Path filtering**: Use `paths=["moves.move", "species"]` to target specific references
+- **Depth control**: `depth=2` will expand references within expanded data
+- **Request budgeting**: `max_requests=100` prevents runaway API usage
+- **Async concurrency**: `concurrency=6` controls parallel requests
+- **Automatic deduplication**: Same URLs are only fetched once
+- **Cache integration**: Uses existing client caching and retry logic
+
+**Usage Notes:**
+- Use small `max_requests` and `concurrency` values to be API-friendly
+- Expansion is breadth-first by depth level  
+- The `__expanded__` key is reserved - avoid using it in your data
+- Data is read via the client's normal request layer (benefits from caching, retries, error handling)
+
+### Pokedex (serebii like views)
+
+Comprehensive Pokedex data with rankings tables and detailed Pokemon views. Inspired by views seen on [serebii.net pokedex](https://serebii.net/pokedex).
+
+#### Rankings:
+
+```python
+from poke_api import AsyncPoke, Poke
+
+johto_rankings = await client.pokedex.rankings(generation=2) # sort_by="total" default
+data = [p.to_dict() for p in johto_rankings]
+print(json.dumps(data, indent=2, ensure_ascii=False))
+```
+
+Example ranking output:
+
+```json
+[
+  {
+    "rank": 1,
+    "regional_no": 247,
+    "national_no": 249,
+    "name": "lugia",
+    "types": [
+      "psychic",
+      "flying"
+    ],
+    "base_stats": {
+      "hp": 106,
+      "attack": 90,
+      "defense": 130,
+      "special-attack": 90,
+      "special-defense": 154,
+      "speed": 110
+    },
+    "total_base_stat": 680,
+    "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/gold/249.png"
+  },
+  {
+    "rank": 2,
+    "regional_no": 248,
+    "national_no": 250,
+    "name": "ho-oh",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "base_stats": {
+      "hp": 106,
+      "attack": 130,
+      "defense": 90,
+      "special-attack": 110,
+      "special-defense": 154,
+      "speed": 90
+    },
+    "total_base_stat": 680,
+    "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/gold/250.png"
+  },
+  {
+    "rank": 3,
+    "regional_no": 249,
+    "national_no": 150,
+    "name": "mewtwo",
+    "types": [
+      "psychic"
+    ],
+    "base_stats": {
+      "hp": 106,
+      "attack": 110,
+      "defense": 90,
+      "special-attack": 154,
+      "special-defense": 90,
+      "speed": 130
+    },
+    "total_base_stat": 680,
+    "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/gold/150.png"
+  },
+  {
+    "rank": 4,
+    "regional_no": 243,
+    "national_no": 149,
+    "name": "dragonite",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "base_stats": {
+      "hp": 91,
+      "attack": 134,
+      "defense": 95,
+      "special-attack": 100,
+      "special-defense": 100,
+      "speed": 80
+    },
+    "total_base_stat": 600,
+    "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/gold/149.png"
+  },
+  {
+    "rank": 5,
+    "regional_no": 246,
+    "national_no": 248,
+    "name": "tyranitar",
+    "types": [
+      "rock",
+      "dark"
+    ],
+    "base_stats": {
+      "hp": 100,
+      "attack": 134,
+      "defense": 110,
+      "special-attack": 95,
+      "special-defense": 100,
+      "speed": 61
+    },
+    "total_base_stat": 600,
+    "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/gold/248.png"
+  },
+...
+]
+```
+
+#### Detail:
+
+
+```python
+from poke_api import AsyncPoke, Poke
+
+mewtwo_detail = await client.pokedex.detail(generation=1, number=150)
+print(mewtwo_detail.to_json())
+```
+
+Example detail output: 
+
+```json
+
+```
+
 ## Caching
 
-The SDK includes built-in intelligent caching using [cachetools](https://github.com/tkem/cachetools/) to improve performance and reduce API calls.
+The SDK uses an in-memory **TTL cache** (via [cachetools](https://github.com/tkem/cachetools/)) to speed up repeat calls and reduce traffic to PokéAPI.
 
-### Cache Type and Configuration
+### Defaults
 
-- **Cache Type**: TTL (Time-To-Live) cache with automatic expiration
-- **Default Settings**: 1024 items max, 60-second TTL per item
-- **Scope**: Per-resource caching (each resource has its own cache)
-- **Behavior**: Identical requests within TTL window return cached results
+* **type**: Per-resource TTL cache (e.g., client.pokemon, client.generation each keep their own cache)
+* **Size**: 1024 items per resource
+* **TTL**: 60 seconds per entry
+
 
 ```python
 from poke_api import Poke
@@ -215,12 +383,11 @@ from poke_api import Poke
 client = Poke()
 
 # First call hits the API
-pikachu1 = client.pokemon.get("pikachu")  # ~200ms API call
+pikachu_1 = client.pokemon.get("pikachu")   # ~200ms
 
-# Second call uses cached data (within 60 seconds)
-pikachu2 = client.pokemon.get("pikachu")  # ~1ms cache hit
+# Within 60s, this is a cache hit
+pikachu_2 = client.pokemon.get("pikachu")   # ~1ms
 ```
-
 ### Sync vs Async Caching
 
 **Sync Caching (Poke)**:
@@ -253,20 +420,8 @@ async def get_pokemon():
 # All 3 results are identical, but only 1 API call was made
 ```
 
-### Cache Customization
+### Per-request Cache Controls ontrols
 
-Cache settings can be controlled both globally and per-request:
-
-#### Global Cache Access (Advanced)
-```python
-# Access cache directly (advanced usage)
-cache = client.pokemon._cache
-print(f"Cache size: {len(cache)} items")
-print(f"Cache info: {cache.currsize}/{cache.maxsize} items")
-
-# Clear cache if needed
-cache.clear()
-```
 
 #### Per-Request Cache Control
 ```python
@@ -341,46 +496,6 @@ robust_request = client.pokemon.get(
 )
 ```
 
-### Cache Control Parameters
-
-- **`use_cache`** (bool, default: True): Whether to use caching at all
-- **`force_refresh`** (bool, default: False): Force a fresh API call, bypassing cache
-- **`cache_ttl`** (int, default: None): Custom cache TTL in seconds (limited support)
-
-### Async Cache Control
-
-The same parameters work with async methods:
-
-```python
-import asyncio
-from poke_api import AsyncPoke
-
-async def example():
-    client = AsyncPoke()
-    
-    try:
-        # Force refresh with async
-        fresh = await client.pokemon.get("pikachu", force_refresh=True)
-        
-        # Disable cache with custom timeout
-        result = await client.pokemon.get(
-            "pikachu", 
-            use_cache=False, 
-            timeout=15.0
-        )
-        
-        # List with cache control
-        pages = await client.pokemon.list(
-            limit=50,
-            force_refresh=True,  # Always get fresh data
-            timeout=20.0
-        )
-        
-    finally:
-        await client.aclose()
-
-asyncio.run(example())
-```
 
 ### Cache Control Best Practices
 
@@ -448,13 +563,30 @@ except NotFoundError as e:
     print(f"Error message: {e}")            # Details from API
 ```
 
+## Project Structure
+
+```bash
+.
+├── src/poke_api/               # Main SDK package
+│   ├── _client.py              # Sync/async HTTP clients with retry logic
+│   ├── _exceptions.py          # SDK exception hierarchy
+│   ├── _resource.py            # Base resource classes with caching
+│   ├── _types.py               # Common types and BaseModel with friendly printing
+│   ├── pagination.py           # Page/AsyncPage classes with auto-iteration
+│   ├── expansion.py            # For handling subsequent APIs for NamedResources (name+url return objects)
+│   ├── resources/              # API resource implementations (pokemon, generation)
+│   └── types/                  # Pydantic models for API responses
+├── tests/                      # Unit and integration tests
+├── examples/                   # Usage examples organized by resource type
+├── pyproject.toml              # Poetry config and dependencies
+└── README.md                   # Documentation
+```
+
 ## Testing
 
 The SDK includes both unit tests (with mocked HTTP calls) and integration tests (hitting the real PokeAPI).
 
 ### Run All Tests
-
-Using Makefile:
 
 ```bash
 make test
