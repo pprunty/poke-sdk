@@ -1,8 +1,6 @@
 # PokeAPI Python API Library
 
-**Version**: 0.1.0 (Development)
-
-> **Note**: This is currently a development version. For production use, please wait for the official PyPI release or install from source.
+[![PyPI version](https://badge.fury.io/py/poke-sdk.svg)](https://badge.fury.io/py/poke-sdk)
 
 ![header](./header.png)
 
