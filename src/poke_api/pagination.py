@@ -51,7 +51,7 @@ class _PageBase(Generic[T]):
         query_params = parse_qs(parsed.query)
 
         # Flatten single values and convert numeric strings to integers
-        info = {}
+        info: dict[str, Any] = {}
         for key, values in query_params.items():
             if values:
                 value = values[0]
@@ -72,7 +72,7 @@ class _PageBase(Generic[T]):
         query_params = parse_qs(parsed.query)
 
         # Flatten single values and convert numeric strings to integers
-        info = {}
+        info: dict[str, Any] = {}
         for key, values in query_params.items():
             if values:
                 value = values[0]

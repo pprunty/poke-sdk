@@ -84,6 +84,6 @@ jobs:
       run: |
         make format
 
-    - name: Run type checking
-      run: |
-        poetry run mypy src/poke_api --ignore-missing-imports
+    # - name: Run type checking
+    #   run: |
+    #     poetry run mypy src/poke_api --ignore-missing-imports

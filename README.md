@@ -776,6 +776,16 @@ This will include a test coverage report.
 
 See [Conribution Guidelines](./CONTRIBUTING.md) for development setup and guidelines. This project uses conventional commits for automated versioning and PyPI publishing.
 
+## Known issues
+
+The static type checker has many issues, I'll get around to fixing them eventually.
+
+To run the check:
+
+```bash
+poetry run mypy src/poke_api --ignore-missing-imports
+```
+
 ## License
 
 Licensed under the [MIT license](./LICENSE).
