@@ -1,8 +1,8 @@
 name: Release
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [published]
 
 jobs:
   release:
@@ -20,9 +20,9 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.8"
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -33,10 +33,10 @@ jobs:
 
     - name: Load cached venv
       id: cached-poetry-dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: .venv
-        key: venv-${{ runner.os }}-3.12-${{ hashFiles('**/poetry.lock') }}
+        key: venv-${{ runner.os }}-3.8-${{ hashFiles('**/poetry.lock') }}
 
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -47,32 +47,12 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run pytest --cov=poke_api --cov-report=xml --cov-report=term-missing -v
+        poetry run pytest -v
 
-    - name: Run linting
-      run: |
-        poetry run ruff check .
-        poetry run ruff format --check .
-
-    - name: Run type checking
-      run: |
-        poetry run mypy src/poke_api --ignore-missing-imports
-
-    - name: Python Semantic Release
-      id: release
-      uses: python-semantic-release/python-semantic-release@v8.5.1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Publish package distributions to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      if: steps.release.outputs.released == 'true'
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        skip-existing: true
+    - name: Build package
+      run: poetry build
 
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      if: steps.release.outputs.released == 'true'
       # Repository URL is automatically set to PyPI
       # Trusted publishing is used (no API token needed)

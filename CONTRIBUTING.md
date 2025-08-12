@@ -4,7 +4,7 @@
 
 1. Install Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
 2. Clone and install: `git clone https://github.com/pprunty/poke-sdk.git && cd poke-sdk && poetry install`
-3. Run tests: `poetry run pytest`
+3. Run tests: `make test`
 
 ## Commit Format
 
@@ -23,10 +23,8 @@ fix: handle 404 errors correctly
 ## Development
 
 ```bash
-poetry run pytest              # Run tests
-poetry run ruff check . --fix  # Lint and auto-fix code
-poetry run ruff format .       # Format code
-make format                    # Format and lint with auto-fix
+make tests                     # Run tests with coverage report
+make format                    # Lint and auto-fix code
 ```
 
-Releases are automated via GitHub Actions when PRs are merged to `main`.
+Releases on PyPi will be automated via GitHub Actions when a new tagged release is created on GitHub.

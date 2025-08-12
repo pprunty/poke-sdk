@@ -85,7 +85,7 @@ class Poke(BaseClient):
         url = self._join(path)
         timeout = kw.pop("timeout", self._timeout)
         retries = kw.pop("retries", 2)
-        backoff = kw.pop("backoff", 0.3)
+        backoff = kw.pop("backoff", 0.3)  # In seconds
 
         for attempt in range(retries + 1):
             try:
@@ -149,7 +149,7 @@ class AsyncPoke(BaseClient):
         url = self._join(path)
         timeout = kw.pop("timeout", self._timeout)
         retries = kw.pop("retries", 2)
-        backoff = kw.pop("backoff", 0.3)
+        backoff = kw.pop("backoff", 0.3)  # In seconds
 
         # Update the async client timeout if needed
         if timeout != self._timeout:

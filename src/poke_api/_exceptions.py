@@ -75,6 +75,7 @@ def map_http_error(status_code: int, body: Any = None) -> APIStatusError:
     if status_code == 400:
         return BadRequestError(status_code, message)
     elif status_code == 401:
+        # Never going to happen, but included for completeness
         return UnauthorizedError(status_code, message)
     elif status_code == 403:
         return ForbiddenError(status_code, message)

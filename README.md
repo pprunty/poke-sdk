@@ -1,8 +1,10 @@
 # PokeAPI Python API Library
 
+<!-- [![PyPI version](https://badge.fury.io/py/poke-sdk.svg)](https://badge.fury.io/py/poke-sdk) -->
+
 ![header](./header.png)
 
-The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8 applications (haven't tested on other versions). The library includes type definitions for all APIs, including request params and response fields, and offers both synchronous and asynchronous clients powered by httpx.
+The PokeAPI Python Library provides access to [PokeAPI](https://pokeapi.co/) APIs from Python 3.8 applications (haven't tested on other versions). The library includes type definitions for its two core APIs (`/pokemon/{id or name}` and `/generation/{id or name}`), including request params and response fields, and offers both synchronous and asynchronous clients, pagination (with lazy loading), and custom caching and retries powered by httpx, cachetools and pydantic libraries.
 
 Thanks to [PokeAPI](https://pokeapi.co/) for maintaining and making the APIs publicly accessible.
 
@@ -12,18 +14,10 @@ The REST API documentation can be found at <pokeapi.co/docs>. The live site cras
 
 ## Requirements
 
-* python 3.8+
+* python 3.8
+* [Poetry](https://python-poetry.org/) python dependency and project manager (`curl -sSL https://install.python-poetry.org | python3 -` or `pip install poetry`)
 
 ## Installation
-
-### pip
-
-```
-pip install poke_sdk
-```
-
-> [!NOTE]
-> I haven't pushed this to pip (yet). Follow instructions below for manual installation
 
 ### Development
 
@@ -37,8 +31,36 @@ make install
 
 **Run examples**:
 
+```bash
+make example <example_file_path> 
 ```
-make example <example_file_name> 
+The file path should start with `examples/*`
+
+<!-- ### pip
+
+> [!NOTE]
+> I haven't pushed this to PyPi (yet)
+
+```bash
+pip install poke_sdk
+``` -->
+
+## Project Structure
+
+```bash
+.
+├── src/poke_api/               # Main SDK package
+│   ├── _client.py              # Sync/async HTTP clients with retry logic
+│   ├── _exceptions.py          # SDK exception hierarchy
+│   ├── _resource.py            # Base resource classes with caching
+│   ├── _types.py               # Common types and BaseModel with friendly printing
+│   ├── pagination.py           # Page/AsyncPage classes with auto-iteration
+│   ├── resources/              # API resource implementations (pokemon, generation)
+│   └── types/                  # Pydantic models for API responses
+├── tests/                      # Unit and integration tests
+├── examples/                   # Usage examples organized by resource type
+├── pyproject.toml              # Poetry config and dependencies
+└── README.md                   # Documentation
 ```
 
 ## Usage
@@ -114,23 +136,6 @@ All models inherit from `BaseModel` and provide:
 > [!WARNING]
 > The 
 
-## Project Structure
-
-```bash
-.
-├── src/poke_api/               # Main SDK package
-│   ├── _client.py              # Sync/async HTTP clients with retry logic
-│   ├── _exceptions.py          # SDK exception hierarchy
-│   ├── _resource.py            # Base resource classes with caching
-│   ├── _types.py               # Common types and BaseModel with friendly printing
-│   ├── pagination.py           # Page/AsyncPage classes with auto-iteration
-│   ├── resources/              # API resource implementations (pokemon, generation)
-│   └── types/                  # Pydantic models for API responses
-├── tests/                      # Unit and integration tests
-├── examples/                   # Usage examples organized by resource type
-├── pyproject.toml              # Poetry config and dependencies
-└── README.md                   # Documentation
-```
 
 ## Pagination
 
@@ -146,7 +151,7 @@ client = Poke()
 all_pokemon = []
 # Automatically fetches more pages as needed.
 # Note: This will fetch ALL Pokemon (1300+) - use limit for demos
-for pokemon in client.pokemon.list(limit=50):  # Limit for demo
+for pokemon in client.pokemon.list():  # Limit for demo
     # Do something with pokemon here
     all_pokemon.append(pokemon)
 print(all_pokemon)
@@ -250,8 +255,9 @@ async def get_pokemon():
 
 ### Cache Customization
 
-Currently, cache settings are fixed per resource. For advanced use cases, you can access the underlying cache:
+Cache settings can be controlled both globally and per-request:
 
+#### Global Cache Access (Advanced)
 ```python
 # Access cache directly (advanced usage)
 cache = client.pokemon._cache
@@ -260,6 +266,16 @@ print(f"Cache info: {cache.currsize}/{cache.maxsize} items")
 
 # Clear cache if needed
 cache.clear()
+```
+
+#### Per-Request Cache Control
+```python
+# Control caching per request (recommended approach)
+pokemon = client.pokemon.get("pikachu", force_refresh=True)      # Skip cache
+pokemon = client.pokemon.get("pikachu", use_cache=False)         # Disable caching
+pokemon = client.pokemon.get("pikachu", cache_ttl=300)           # Custom TTL
+
+# See "Cache Control" section below for full details
 ```
 
 ### Performance Benefits
@@ -297,7 +313,140 @@ result = await async_client.pokemon.get("pikachu", retries=3, timeout=15.0)
 - Default: 2 retries, 0.3s base backoff, 10s timeout
 - Per-request overrides via `timeout=`, `retries=`, `backoff=` kwargs
 
+## Cache Control
+
+In addition to the automatic caching described above, you can control caching behavior on a per-request basis with cache control parameters:
+
+```python
+from poke_api import Poke
+
+client = Poke()
+
+# Force refresh - bypass cache entirely
+fresh_data = client.pokemon.get("pikachu", force_refresh=True)
+
+# Disable caching for this request only
+no_cache = client.pokemon.get("pikachu", use_cache=False)
+
+# Custom cache TTL (Note: limited support due to single cache instance)
+longer_cache = client.pokemon.get("pikachu", cache_ttl=300)  # 5 minutes
+
+# Combine with retry/timeout parameters
+robust_request = client.pokemon.get(
+    "pikachu",
+    force_refresh=True,    # Skip cache
+    timeout=30.0,          # 30 second timeout
+    retries=3,             # 3 retry attempts
+    backoff=1.0            # 1 second base backoff
+)
+```
+
+### Cache Control Parameters
+
+- **`use_cache`** (bool, default: True): Whether to use caching at all
+- **`force_refresh`** (bool, default: False): Force a fresh API call, bypassing cache
+- **`cache_ttl`** (int, default: None): Custom cache TTL in seconds (limited support)
+
+### Async Cache Control
+
+The same parameters work with async methods:
+
+```python
+import asyncio
+from poke_api import AsyncPoke
+
+async def example():
+    client = AsyncPoke()
+    
+    try:
+        # Force refresh with async
+        fresh = await client.pokemon.get("pikachu", force_refresh=True)
+        
+        # Disable cache with custom timeout
+        result = await client.pokemon.get(
+            "pikachu", 
+            use_cache=False, 
+            timeout=15.0
+        )
+        
+        # List with cache control
+        pages = await client.pokemon.list(
+            limit=50,
+            force_refresh=True,  # Always get fresh data
+            timeout=20.0
+        )
+        
+    finally:
+        await client.aclose()
+
+asyncio.run(example())
+```
+
+### Cache Control Best Practices
+
+1. **Use `force_refresh=True`** when you need the most recent data (e.g., after creating/updating resources)
+2. **Use `use_cache=False`** for one-time requests where caching doesn't provide value
+3. **Combine with retries** for critical requests: `force_refresh=True, retries=3`
+4. **Consider cache TTL** limitations: the current implementation uses a single cache instance per resource
+
+> [!NOTE]
+> Custom `cache_ttl` has limitations in the current implementation as all resources share the same TTL cache instance. For different TTL requirements, consider using `force_refresh=True` or `use_cache=False` instead.
+
 ## Error Handling
+
+The SDK provides a comprehensive exception hierarchy for handling API errors gracefully. All exceptions inherit from `PokeAPIError` and map HTTP status codes to specific exception types.
+
+### Exception Types
+
+```python
+from poke_api import (
+    PokeAPIError,           # Base exception for all SDK errors
+    APIConnectionError,     # Network/transport problems
+    APITimeoutError,        # Request timeouts
+    NotFoundError,          # 404 Not Found
+    BadRequestError,        # 400 Bad Request  
+    RateLimitError,         # 429 Too Many Requests
+    ServerError,            # 5xx Server Errors
+)
+```
+
+### Automatic Error Mapping
+
+The SDK automatically maps HTTP status codes to appropriate exceptions using the `map_http_error()` method:
+
+- **4xx Client Errors**: `BadRequestError`, `NotFoundError`, `RateLimitError`, etc.
+- **5xx Server Errors**: `ServerError`, `ServiceUnavailableError`
+- **Network Issues**: `APIConnectionError`, `APITimeoutError`
+
+### Usage Examples
+
+```python
+from poke_api import Poke, NotFoundError, APIConnectionError
+
+client = Poke()
+
+try:
+    # This will raise NotFoundError for non-existent Pokemon
+    pokemon = client.pokemon.get("definitely-not-a-pokemon")
+except NotFoundError:
+    print("Pokemon not found!")
+except APIConnectionError:
+    print("Network error - check your connection")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
+### Error Information
+
+All API errors include the HTTP status code and response body when available:
+
+```python
+try:
+    pokemon = client.pokemon.get("invalid-pokemon")
+except NotFoundError as e:
+    print(f"Status code: {e.status_code}")  # 404
+    print(f"Error message: {e}")            # Details from API
+```
 
 ## Testing
 
@@ -310,20 +459,7 @@ Using Makefile:
 ```bash
 make test
 ```
-Using poetry directly:
-```bash
-# All tests (unit + integration)
-poetry run pytest
-
-# Only unit tests (fast, no network calls)
-poetry run pytest tests/test_pokemon_unit.py
-
-# Only integration tests (hits real API)
-poetry run pytest -m integration
-
-# Verbose output
-poetry run pytest -v
-```
+This will include a test coverage report.
 
 ### Test Types
 
@@ -332,7 +468,7 @@ poetry run pytest -v
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines. This project uses conventional commits for automated versioning and PyPI publishing.
+See [Conribution Guidelines](./CONTRIBUTING.md) for development setup and guidelines. This project uses conventional commits for automated versioning and PyPI publishing.
 
 ## License
 

@@ -1,4 +1,5 @@
 # Purpose
+
 This repository is a minimal, professional Python SDK for the public PokeAPI. It’s built for a take-home assignment and optimized for clarity, correctness, and developer experience—not bells and whistles. Keep it small, clean, and easy to review.
 
 High-level goals (what “done” looks like)
@@ -12,7 +13,7 @@ pokemon resource with:
 
 get(id_or_name) → returns a Pokémon (dict or typed model later).
 
-list(limit=20, offset=0, type=None) → lists Pokémon; when type is provided, returns names filtered by type via /type/{name}.
+list(limit=20, offset=0, type=None) → lists Pokémon; when type is provided, returns paginated set
 
 Exceptions, not crashes
 
@@ -36,7 +37,7 @@ Polish but not over-engineered
 
 Type markers (py.typed) already present.
 
-Keep dependencies minimal (httpx + optional pydantic later).
+Keep dependencies minimal (httpx + pydantic later).
 
 Non-goals (for this assignment)
 No full spec coverage beyond the pokemon resource.
@@ -63,8 +64,8 @@ Copy
 │       ├── _client.py
 │       ├── _exceptions.py
 │       ├── _utils
-│       ├── _version.py
-│       ├── lib
+│       ├── _resources.py
+│       ├── _types.py
 │       ├── pagination.py
 │       ├── py.typed
 │       ├── resources
