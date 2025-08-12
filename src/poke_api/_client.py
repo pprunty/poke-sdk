@@ -125,6 +125,7 @@ class Poke(BaseClient):
         if url.startswith("http"):
             # For absolute URLs, we need to make a direct request
             import httpx
+
             timeout = self._timeout
             retries = 2
             backoff = 0.3
@@ -134,6 +135,7 @@ class Poke(BaseClient):
                     r = httpx.request("GET", url, timeout=timeout)
                     if r.status_code >= 500 and attempt < retries:
                         import time
+
                         time.sleep(backoff * (2**attempt))
                         continue
                     break
@@ -145,6 +147,7 @@ class Poke(BaseClient):
                 ) as e:
                     if attempt < retries:
                         import time
+
                         time.sleep(backoff * (2**attempt))
                         continue
                     raise APIConnectionError(str(e)) from e
@@ -168,7 +171,10 @@ class Poke(BaseClient):
     ) -> dict:
         """Public expansion API (sync)"""
         from .expansion import expand_sync
-        return expand_sync(self, obj, paths=paths, depth=depth, max_requests=max_requests)
+
+        return expand_sync(
+            self, obj, paths=paths, depth=depth, max_requests=max_requests
+        )
 
 
 class AsyncPoke(BaseClient):
@@ -293,6 +299,12 @@ class AsyncPoke(BaseClient):
     ) -> dict:
         """Public expansion API (async)"""
         from .expansion import expand_async
+
         return await expand_async(
-            self, obj, paths=paths, depth=depth, max_requests=max_requests, concurrency=concurrency
+            self,
+            obj,
+            paths=paths,
+            depth=depth,
+            max_requests=max_requests,
+            concurrency=concurrency,
         )

@@ -6,6 +6,7 @@ import copy
 
 # --- Helpers ---------------------------------------------------------------
 
+
 def _model_to_dict(obj: Any) -> Dict[str, Any]:
     """Supports Pydantic v2 models; falls back to dict-like. Always returns a deep copy."""
     if hasattr(obj, "to_dict"):
@@ -17,13 +18,15 @@ def _model_to_dict(obj: Any) -> Dict[str, Any]:
     else:
         # Final fallback – best-effort:
         result = dict(obj)
-    
+
     # Always return a deep copy to avoid mutating the original
     return copy.deepcopy(result)
+
 
 def _is_ref_like(v: Any) -> bool:
     """PokéAPI refs are APIResource {url} or NamedAPIResource {name,url}"""
     return isinstance(v, dict) and isinstance(v.get("url"), str)
+
 
 def _flatten(xs: Iterable[Any]) -> List[Any]:
     out: List[Any] = []
@@ -33,6 +36,7 @@ def _flatten(xs: Iterable[Any]) -> List[Any]:
         else:
             out.append(x)
     return out
+
 
 def _get_at_path(root: Dict[str, Any], path: str) -> List[Dict[str, Any]]:
     """
@@ -55,6 +59,7 @@ def _get_at_path(root: Dict[str, Any], path: str) -> List[Dict[str, Any]]:
     # keep only dicts (refs will be dicts with {"url": ...})
     return [n for n in frontier if isinstance(n, dict)]
 
+
 def _collect_immediate_refs(node: Any) -> List[Dict[str, Any]]:
     """Find direct children that are ref-like (including inside lists)."""
     out: List[Dict[str, Any]] = []
@@ -68,7 +73,9 @@ def _collect_immediate_refs(node: Any) -> List[Dict[str, Any]]:
                         out.append(it)
     return out
 
+
 # --- SYNC expansion --------------------------------------------------------
+
 
 def expand_sync(
     client,  # Poke
@@ -98,7 +105,7 @@ def expand_sync(
 
     # Cache fetched data to avoid duplicate requests
     url_data_cache = {}
-    
+
     for _ in range(max(0, depth)):
         if not queue or budget <= 0:
             break
@@ -107,7 +114,7 @@ def expand_sync(
             url = ref.get("url")
             if not url:
                 continue
-                
+
             # If we've already fetched this URL, use cached data
             if url in url_data_cache:
                 ref["__expanded__"] = url_data_cache[url]
@@ -126,7 +133,9 @@ def expand_sync(
                 queue.extend(_collect_immediate_refs(data))
     return root
 
+
 # --- ASYNC expansion -------------------------------------------------------
+
 
 async def expand_async(
     client,  # AsyncPoke
@@ -153,12 +162,12 @@ async def expand_async(
         url = ref.get("url")
         if not url:
             return None
-            
+
         # If already cached, use cached data
         if url in url_data_cache:
             ref["__expanded__"] = url_data_cache[url]
             return _collect_immediate_refs(url_data_cache[url])
-            
+
         # If not seen and budget available, fetch it
         if url not in seen and budget > 0:
             seen.add(url)

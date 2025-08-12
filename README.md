@@ -1,6 +1,6 @@
 # PokeAPI Python API Library
 
-<!-- [![PyPI version](https://badge.fury.io/py/poke-sdk.svg)](https://badge.fury.io/py/poke-sdk) -->
+[![PyPI version](https://badge.fury.io/py/poke-sdk.svg)](https://badge.fury.io/py/poke-sdk)
 
 ![header](./header.png)
 
@@ -42,14 +42,14 @@ make example <example_file_path>
 ```
 The file path should start with `examples/*`
 
-<!-- ### pip
+### pip
 
-> [!NOTE]
+> [!WARNING]
 > I haven't pushed this to PyPi (yet)
 
 ```bash
 pip install poke_sdk
-``` -->
+```
 
 ## Usage
 
@@ -363,8 +363,102 @@ print(mewtwo_detail.to_json())
 Example detail output: 
 
 ```json
-
+{
+  "name": "mewtwo",
+  "other_names": [
+    {"language": "ja-Hrkt", "value": "ミュウツー"},
+    {"language": "ko", "value": "뮤츠"},
+    {"language": "zh-Hant", "value": "超夢"},
+    {"language": "fr", "value": "Mewtwo"},
+    {"language": "de", "value": "Mewtu"},
+    ...
+  ],
+  "national_no": 150,
+  "regional_no": 150,
+  "gender_ratio": "Genderless",
+  "types": ["psychic"],
+  "classification": "Genetic Pokémon",
+  "height_m": 2.0,
+  "height_ft_in": "6'07\"",
+  "weight_kg": 122.0,
+  "weight_lbs": 269.0,
+  "capture_rate": 3,
+  "base_egg_steps": 30855,
+  "growth_rate": "slow",
+  "base_happiness": 0,
+  "ev_yields": [{"stat": "special-attack", "value": 3}],
+  "damage_taken": [
+    {"type": "fighting", "multiplier": 0.5},
+    {"type": "bug", "multiplier": 2.0},
+    {"type": "ghost", "multiplier": 2.0},
+    {"type": "psychic", "multiplier": 0.5},
+    {"type": "dark", "multiplier": 2.0},
+    ...
+  ],
+  "wild_held_items": {},
+  "egg_groups": ["no-eggs"],
+  "evolution_chain": ["mewtwo"],
+  "locations": [],
+  "level_up_moves": [
+    {
+      "level": 1,
+      "name": "confusion",
+      "type": "psychic",
+      "power": 50,
+      "accuracy": 100,
+      "pp": 25,
+      "method": "level-up",
+      "version_group": "red-blue"
+    },
+    {
+      "level": 1,
+      "name": "psychic",
+      "type": "psychic",
+      "power": 90,
+      "accuracy": 100,
+      "pp": 10,
+      "method": "level-up",
+      "version_group": "red-blue"
+    },
+    ...
+  ],
+  "tm_hm_moves": [
+    {
+      "level": null,
+      "name": "ice-beam",
+      "type": "ice",
+      "power": 90,
+      "accuracy": 100,
+      "pp": 10,
+      "method": "machine",
+      "version_group": "red-blue"
+    },
+    {
+      "level": null,
+      "name": "thunderbolt",
+      "type": "electric",
+      "power": 90,
+      "accuracy": 100,
+      "pp": 15,
+      "method": "machine",
+      "version_group": "red-blue"
+    },
+    ...
+  ],
+  "tutor_moves": [],
+  "gen1_only_moves": [],
+  "sprite_url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-i/red-blue/150.png",
+  "shiny_sprite_url": null
+}
 ```
+
+**Key Improvements in Detail View:**
+- **Complete Move Information**: Now includes power, accuracy, PP, and type for all moves
+- **Generation-Specific Data**: Only shows moves and locations available in the target generation
+- **Shiny Sprites**: Includes `shiny_sprite_url` for generations that support them (Gen 2+)
+- **Authentic Experience**: Each generation shows only the data that was actually available in those games
+
+> **Note**: Examples use `...` to indicate where additional data would appear in the full response.
 
 ## Caching
 
@@ -420,10 +514,8 @@ async def get_pokemon():
 # All 3 results are identical, but only 1 API call was made
 ```
 
-### Per-request Cache Controls ontrols
+### Per-request Cache Controls Controls
 
-
-#### Per-Request Cache Control
 ```python
 # Control caching per request (recommended approach)
 pokemon = client.pokemon.get("pikachu", force_refresh=True)      # Skip cache
@@ -506,6 +598,7 @@ robust_request = client.pokemon.get(
 
 > [!NOTE]
 > Custom `cache_ttl` has limitations in the current implementation as all resources share the same TTL cache instance. For different TTL requirements, consider using `force_refresh=True` or `use_cache=False` instead.
+
 
 ## Error Handling
 

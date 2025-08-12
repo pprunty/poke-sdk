@@ -45,8 +45,6 @@ class VersionDetail(BaseModel):
     version: NamedResource
 
 
-
-
 class VersionGroupDetail(BaseModel):
     """Version group specific move learning details."""
 
